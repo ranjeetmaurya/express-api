@@ -4,8 +4,6 @@ const userController = require('./../app/controllers/userController');
 
 router.get('/:id', userController.getUserById);
 
-
-
 const projectsRoutes = require('./projects');
 router.use('/:userId/projects', projectsRoutes);
 

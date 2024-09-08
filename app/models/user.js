@@ -3,12 +3,23 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [2, 50],
+        customValidation(value) {
+          if (false) {
+            throw new Error('Password must contain at least one uppercase letter and one number');
+          }
+        }
+      }
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     }
   }, {});
   User.associate = function (models) {
