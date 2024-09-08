@@ -25,16 +25,21 @@ const { User } = require('./../models');
     }
   };
   
-//   // Create a new user
-//   exports.createUser = async (req, res) => {
-//     const { name, email } = req.body;
-//     try {
-//       const newUser = await User.create({ name, email });
-//       res.status(201).json(newUser);
-//     } catch (error) {
-//       res.status(500).json({ error: 'Failed to create user' });
-//     }
-//   };
+  // Create a new user
+  exports.createUser = async (req, res) => {
+    const { name, email } = req.body;
+    console.log(`Received ${req.method} request with body:`, req.body);
+    try {
+      const newUser = await User.create({ name, email });
+      res.status(201).json(newUser);
+    } catch (error) {
+      if (error.name === 'SequelizeValidationError') {
+          const errors = error.errors.map(err => err.message);
+          return res.status(400).json({ errors });
+          }  
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  };
   
 //   // Update a user
 //   exports.updateUser = async (req, res) => {
