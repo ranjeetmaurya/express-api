@@ -4,7 +4,7 @@ const sequelize = require('./app//models').sequelize; // Sequelize instance from
 const app = express();
 const path = require('path');
 const rootRoute = require('./routes/root');
-const userRoute = require('./routes/user');
+const userRoute = require('./routes/users');
 
 
 app.use(express.json());

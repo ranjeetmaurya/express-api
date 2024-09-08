@@ -13,4 +13,7 @@ router.get('/:id', async (req, res) => {
     };
 });
 
+const projectsRoutes = require('./projects');
+router.use('/:userId/projects', projectsRoutes);
+
 module.exports = router;
