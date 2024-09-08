@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     }
   }, {});
-  
+  User.associate = function (models) {
+    User.hasMany(models.Project, { foreignKey: 'user_id'})
+  }  
   return User;
 };
