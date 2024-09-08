@@ -21,7 +21,18 @@ module.exports = (sequelize, DataTypes) => {
         isEmail: true
       }
     }
-  }, {});
+  }, {
+    hooks: {
+      beforeCreate: (user, options) => {
+        console.log('Before creating a user:', user.name);
+        // Perform actions before creating the user, such as validation
+      },
+      afterCreate: (user, options) => {
+        console.log('After creating a user:', user.name);
+        // Perform actions after the user is created
+      }      
+    }
+  });
   User.associate = function (models) {
     User.hasMany(models.Project, { foreignKey: 'user_id'})
   }  
