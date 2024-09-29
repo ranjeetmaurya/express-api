@@ -1,51 +1,64 @@
 const { User } = require('./../models');
-// // Get all users
-// exports.getAllUsers = async (req, res) => {
-//     try {
-//       const users = await User.findAll();
-//       res.status(200).json(users);
-//     } catch (error) {
-//       res.status(500).json({ error: 'Failed to retrieve users' });
-//     }
-//   };
-  
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');  
   // Get a user by ID
-  exports.getUserById = async (req, res) => {
-    const { id } = req.params;
-    try {
-      const user = await User.findByPk(id);
-      console.log("User");
-      console.log(user);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+exports.getUserById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+
+// Create a new user
+exports.createUser = async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const newUser = await User.create({ name, email, password });
+    res.status(201).json(newUser);
+  } catch (error) {
+    if (error.name === 'SequelizeValidationError') {
+        console.log(error.errors);
+        const errors = error.errors.map(err => err.message);
+        return res.status(400).json({ errors });
+        }  
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+};
+
+exports.authenticate = async (req, resp) => {
+  const {email, password} = req.body;
+  try {
+    const user = await User.findOne({ 
+      where: {
+        email: email
       }
-      res.status(200).json(user);
-    } catch (error) {
-      res.status(500).json({ error: error });
+    });
+    if(!user){
+      return resp.status(401).json({ error: 'Email or password is inconrrect' });
     }
-  };
-  
-  // Create a new user
-  exports.createUser = async (req, res) => {
-    const { name, email } = req.body;
-    console.log(`Received ${req.method} request with body:`, req.body);
-    try {
-      const newUser = await User.create({ name, email });
-      res.status(201).json(newUser);
-    } catch (error) {
-      if (error.name === 'SequelizeValidationError') {
-          const errors = error.errors.map(err => err.message);
-          return res.status(400).json({ errors });
-          }  
-      res.status(500).json({ error: 'Failed to create user' });
+    const validPassword = await user.isValidPassword(password);
+    if(user && validPassword){
+      const accessToken = jwt.sign({ username: user.email, id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+      resp.status(201).json({ id: user.id, email: user.email,  accessToken: accessToken}); 
+    }else{
+      resp.status(401).json({ error: 'Email or password is inconrrect' }); 
     }
-  };
-  
+      
+  } catch(error) {
+    resp.status(500).json({ error: error.message });
+  }
+}  
 //   // Update a user
 //   exports.updateUser = async (req, res) => {
 //     const { userId } = req.params;
 //     const { name, email } = req.body;
-//     try {
+//     try { 
 //       const user = await User.findByPk(userId);
 //       if (!user) {
 //         return res.status(404).json({ error: 'User not found' });
